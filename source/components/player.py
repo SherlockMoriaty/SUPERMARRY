@@ -136,9 +136,13 @@ class Player(pygame.sprite.Sprite):
         pass
 
     def walk(self, keys):
-        self.max_x_vel = self.max_walk_vel
-        self.x_accel = self.walk_accel
-        if self.current_time - self.walking_timer > 100:
+        if keys[pygame.K_s]:
+            self.max_x_vel = self.max_run_vel
+            self.x_accel = self.run_accel
+        else:
+            self.max_x_vel = self.max_walk_vel
+            self.x_accel = self.walk_accel
+        if self.current_time - self.walking_timer > self.calc_frame_duration():
             if self.frame_index < 3:
                 self.frame_index += 1
             else:
@@ -169,7 +173,6 @@ class Player(pygame.sprite.Sprite):
                 if self.x_vel > 0:
                     self.x_vel = 0
                     self.state = 'stand'
-
         pass
 
     def jump(self, keys):
@@ -183,3 +186,7 @@ class Player(pygame.sprite.Sprite):
             return min(vel + accel, max_vel)
         else:
             return max(vel - accel, -max_vel)
+
+    def calc_frame_duration(self):
+        duration = -60 / self.max_run_vel+abs(self.x_vel)+80
+        return duration
