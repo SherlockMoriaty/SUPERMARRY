@@ -32,7 +32,7 @@ class Game:
 
             pygame.display.update()
             # 计时+帧速率
-            self.clock.tick(10)
+            self.clock.tick(60)
 
 
 # 对图片文件的通用处理方法
