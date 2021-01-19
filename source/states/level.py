@@ -4,10 +4,11 @@ from .. import constants as C
 import os,json
 import pygame
 class Level:
-    def __init__(self):
+    def start(self,game_info):
+        self.game_info=game_info
         self.finished=False
         self.next='game_over'
-        self.info = info.Info('level')
+        self.info = info.Info('level',game_info)
         self.load_map_data()
         self.setup_background()
         self.setup_start_positions()
@@ -57,10 +58,12 @@ class Level:
         if self.player.dead:
             if self.current_time-self.player.death_timer>3000:
                 self.finished=True
+                self.update_game_info()
         else:
             self.update_player_position()
             self.check_if_go_die()
             self.update_game_window()
+            self.info.update()
 
         self.draw(surface)
 
@@ -132,6 +135,14 @@ class Level:
         if self.player.rect.y>C.SCREEN_H:
             self.player.go_die()
         pass
+
+    def update_game_info(self):
+        if self.player.dead:
+            self.game_info['lives']-=1
+        if self.game_info['lives']==0:
+            self.next='game_over'
+        else:
+            self.next='load_screen'
 
     def draw(self, surface):
         #画背景
