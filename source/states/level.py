@@ -6,7 +6,7 @@ import pygame
 class Level:
     def __init__(self):
         self.finished=False
-        self.next=None
+        self.next='game_over'
         self.info = info.Info('level')
         self.load_map_data()
         self.setup_background()
@@ -51,9 +51,17 @@ class Level:
                 self.ground_items_group.add(stuff.Item(item['x'],item['y'],item['width'],item['height'],name))
 
     def update(self,surface,keys):
+        self.current_time=pygame.time.get_ticks()
         self.player.update(keys)
-        self.update_player_position()
-        self.update_game_window()
+
+        if self.player.dead:
+            if self.current_time-self.player.death_timer>3000:
+                self.finished=True
+        else:
+            self.update_player_position()
+            self.check_if_go_die()
+            self.update_game_window()
+
         self.draw(surface)
 
     def update_player_position(self):
@@ -119,6 +127,11 @@ class Level:
         if self.player.x_vel>0 and self.player.rect.centerx>thread and self.game_window.right<self.end_x:
             self.game_window.x+=self.player.x_vel
             self.start_x=self.game_window.x
+
+    def check_if_go_die(self):
+        if self.player.rect.y>C.SCREEN_H:
+            self.player.go_die()
+        pass
 
     def draw(self, surface):
         #画背景

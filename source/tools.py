@@ -18,11 +18,13 @@ class Game:
             self.state.finished=False
             self.state=self.state_dict[next_state]
         self.state.update(self.screen, self.keys)
+
     def run(self):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.display.quit()
+                    quit()
                 elif event.type == pygame.KEYDOWN:
                     self.keys = pygame.key.get_pressed()
                 elif event.type == pygame.KEYUP:
