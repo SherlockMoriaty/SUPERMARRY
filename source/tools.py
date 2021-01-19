@@ -48,6 +48,7 @@ def load_graphics(path, accept=('.jpg', '.png', '.bmp', '.gif')):
         if ext.lower() in accept:
             img = pygame.image.load(os.path.join(path, pic))
             # 如果图片带着alpha参量，就是透明底的png格式，就转换成带透明层的，这部不是必须的，但是是建议的加快渲染的操作
+            # print(os.path.join(path, pic),img.get_alpha())
             if img.get_alpha():
                 img = img.convert_alpha()
             else:
