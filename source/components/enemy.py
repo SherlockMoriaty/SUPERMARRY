@@ -30,6 +30,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x=x
         self.rect.bottom=y_bottom
 
+        self.timer=0
 
     def load_frames(self,frame_rects):
         for frame_rect in frame_rects:
@@ -37,6 +38,13 @@ class Enemy(pygame.sprite.Sprite):
             right_frame=pygame.transform.flip(left_frame,True,False)
             self.left_frames.append(left_frame)
             self.right_frames.append(right_frame)
+
+    def update(self):
+        self.current_time=pygame.time.get_ticks()
+        if self.current_time-self.timer>125:
+            self.frame_index=(self.frame_index+1)%2
+            self.image=self.frames[self.frame_index]
+            self.timer=self.current_time
     pass
 
 class Goomba(Enemy):

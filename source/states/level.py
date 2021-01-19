@@ -98,6 +98,9 @@ class Level:
             self.info.update()
             self.brick_group.update()
             self.box_group.update()
+            for enemy_group in self.enemy_group_dict.values():
+                enemy_group.update()
+
 
         self.draw(surface)
 
