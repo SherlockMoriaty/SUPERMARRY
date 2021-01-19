@@ -16,6 +16,8 @@ class Level:
         self.setup_ground_items()
         self.setup_bricks_and_boxes()
         self.setup_enemies()
+        self.setup_checkpoints()
+
 
 
     def load_map_data(self):
@@ -75,6 +77,7 @@ class Level:
                 self.box_group.add(box.Box(x,y,box_type))
 
     def setup_enemies(self):
+        self.enemy_group=pygame.sprite.Group()
         self.enemy_group_dict={}
         for enemy_group_data in self.map_data['enemy']:
             group = pygame.sprite.Group()
@@ -82,6 +85,15 @@ class Level:
                 for enemy_data in enemy_list:
                     group.add(enemy.create_enemy(enemy_data))
                 self.enemy_group_dict[enemy_group_id]=group
+
+    def setup_checkpoints(self):
+        self.checkpoint_group=pygame.sprite.Group()
+        for item in self.map_data['checkpoint']:
+            x,y,w,h=item['x'],item['y'],item['width'],item['height']
+            checkpoint_type=item['type']
+            enemy_groupid=item.get('enemy_groupid')
+            self.checkpoint_group.add(stuff.Checkpoint(x,y,w,h,checkpoint_type,enemy_groupid))
+        pass
 
     def update(self,surface,keys):
         self.current_time=pygame.time.get_ticks()
@@ -93,13 +105,13 @@ class Level:
                 self.update_game_info()
         else:
             self.update_player_position()
+            self.check_checkpoints()
             self.check_if_go_die()
             self.update_game_window()
             self.info.update()
             self.brick_group.update()
             self.box_group.update()
-            for enemy_group in self.enemy_group_dict.values():
-                enemy_group.update()
+            self.enemy_group.update(self)
 
 
         self.draw(surface)
@@ -170,6 +182,13 @@ class Level:
             self.game_window.x+=self.player.x_vel
             self.start_x=self.game_window.x
 
+    def check_checkpoints(self):
+        checkpoint=pygame.sprite.spritecollideany(self.player,self.checkpoint_group)
+        if checkpoint:
+            if checkpoint.checkpoint_type==0:#释放野怪的检查点
+                self.enemy_group.add(self.enemy_group_dict[str(checkpoint.enemy_groupid)])
+            checkpoint.kill()
+
     def check_if_go_die(self):
         if self.player.rect.y>C.SCREEN_H:
             self.player.go_die()
@@ -193,8 +212,7 @@ class Level:
         # 画宝箱
         self.box_group.draw(self.game_ground)
         # 画怪物
-        for enemy_group in self.enemy_group_dict.values():
-            enemy_group.draw(self.game_ground)
+        self.enemy_group.draw(self.game_ground)
         #将gameground的游戏窗口部分渲染到屏幕上
         surface.blit(self.game_ground,(0,0),self.game_window)
         self.info.draw(surface)
