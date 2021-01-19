@@ -72,11 +72,38 @@ class Enemy(pygame.sprite.Sprite):
         if self.y_vel<10:
             self.y_vel+=self.gravity
 
+    def die(self):
+        self.rect.x+=self.x_vel
+        self.rect.y+=self.y_vel
+        self.y_vel+=self.gravity
+        if self.rect.y>C.SCREEN_H:
+            self.kill()
+
+    def trampled(self):
+        self.x_vel=0
+        self.frame_index=2
+        if self.death_timer==0:
+            self.death_timer=self.current_time
+        if self.current_time-self.death_timer>500:
+            self.kill()
+
+    def go_die(self,how):
+        self.death_timer=self.current_time
+        if how=='bumped':
+            self.y_vel=-8
+            self.gravity=0.6
+            self.state='die'
+            self.frame_index=0
+            pass
+        elif how=='trampled':
+            self.state='trampled'
+
     def update_position(self,level):
         self.rect.x+=self.x_vel
         self.check_x_colletions(level)
         self.rect.y += self.y_vel
-        self.check_y_colletions(level)
+        if self.state!='die':
+            self.check_y_colletions(level)
 
     def check_x_colletions(self,level):
         sprite=pygame.sprite.spritecollideany(self, level.ground_items_group)

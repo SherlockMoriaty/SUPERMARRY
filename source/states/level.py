@@ -77,6 +77,7 @@ class Level:
                 self.box_group.add(box.Box(x,y,box_type))
 
     def setup_enemies(self):
+        self.dying_group=pygame.sprite.Group()
         self.enemy_group=pygame.sprite.Group()
         self.enemy_group_dict={}
         for enemy_group_data in self.map_data['enemy']:
@@ -95,27 +96,6 @@ class Level:
             self.checkpoint_group.add(stuff.Checkpoint(x,y,w,h,checkpoint_type,enemy_groupid))
         pass
 
-    def update(self,surface,keys):
-        self.current_time=pygame.time.get_ticks()
-        self.player.update(keys)
-
-        if self.player.dead:
-            if self.current_time-self.player.death_timer>3000:
-                self.finished=True
-                self.update_game_info()
-        else:
-            self.update_player_position()
-            self.check_checkpoints()
-            self.check_if_go_die()
-            self.update_game_window()
-            self.info.update()
-            self.brick_group.update()
-            self.box_group.update()
-            self.enemy_group.update(self)
-
-
-        self.draw(surface)
-
     def update_player_position(self):
 
         # x direction
@@ -127,8 +107,9 @@ class Level:
             self.player.rect.right=self.end_x
         self.check_x_collisions()
         # y direction
-        self.player.rect.y += self.player.y_vel
-        self.check_y_collisions()
+        if not self.player.dead:
+            self.player.rect.y += self.player.y_vel
+            self.check_y_collisions()
 
     def check_x_collisions(self):
         #检查一个精灵是否与精灵组里的任意一个精灵有碰撞
@@ -136,6 +117,10 @@ class Level:
         collided_sprite=pygame.sprite.spritecollideany(self.player, check_group)
         if collided_sprite:
             self.adjust_player_x(collided_sprite)
+
+        enemy = pygame.sprite.spritecollideany(self.player, self.enemy_group)
+        if enemy:
+            self.player.go_die()
         pass
 
     def check_y_collisions(self):
@@ -143,6 +128,20 @@ class Level:
         collided_sprite = pygame.sprite.spritecollideany(self.player, check_group)
         if collided_sprite:
             self.adjust_player_y(collided_sprite)
+
+        enemy=pygame.sprite.spritecollideany(self.player,self.enemy_group)
+        if enemy:
+            self.enemy_group.remove(enemy)
+            self.dying_group.add(enemy)
+            if self.player.y_vel<0:
+                how='bumped'
+            else:
+                how='trampled'
+                self.player.state='jump'
+                self.player.rect.bottom=enemy.rect.top
+                self.player.y_vel=self.player.jump_vel*0.8
+            enemy.go_die(how)
+
         self.check_will_fall(self.player)
         pass
 
@@ -202,6 +201,28 @@ class Level:
         else:
             self.next='load_screen'
 
+    def update(self,surface,keys):
+        self.current_time=pygame.time.get_ticks()
+        self.player.update(keys)
+
+        if self.player.dead:
+            if self.current_time-self.player.death_timer>3000:
+                self.finished=True
+                self.update_game_info()
+        else:
+            self.update_player_position()
+            self.check_checkpoints()
+            self.check_if_go_die()
+            self.update_game_window()
+            self.info.update()
+            self.brick_group.update()
+            self.box_group.update()
+            self.enemy_group.update(self)
+            self.dying_group.update(self)
+
+
+        self.draw(surface)
+
     def draw(self, surface):
         #画背景
         self.game_ground.blit(self.background,self.game_window,self.game_window)
@@ -213,6 +234,8 @@ class Level:
         self.box_group.draw(self.game_ground)
         # 画怪物
         self.enemy_group.draw(self.game_ground)
+        # 画死亡怪物
+        self.dying_group.draw(self.game_ground)
         #将gameground的游戏窗口部分渲染到屏幕上
         surface.blit(self.game_ground,(0,0),self.game_window)
         self.info.draw(surface)
