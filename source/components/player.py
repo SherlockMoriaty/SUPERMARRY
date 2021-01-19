@@ -174,10 +174,10 @@ class Player(pygame.sprite.Sprite):
                 self.frame_index = 5
                 self.x_accel = self.turn_accel
             self.x_vel = self.calc_vel(self.x_vel, self.x_accel, self.max_x_vel, False)
-        elif keys[pygame.K_SPACE] and self.can_jump:
+        if keys[pygame.K_SPACE] and self.can_jump:
             self.state='jump'
             self.y_vel=self.jump_vel
-        else:
+        elif not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
             if self.face_right:
                 self.x_vel -= self.x_accel
                 if self.x_vel < 0:
@@ -225,12 +225,6 @@ class Player(pygame.sprite.Sprite):
     def fall(self,keys):
         # 如果不加限制，下落速度是会无限上升的，对二次元世界不友好
         self.y_vel=self.calc_vel(self.y_vel,self.gravity,self.max_y_vel)
-
-        # TODO workaround, will move to level.py for collision detection
-        if self.rect.bottom>C.GROUND_HEIGHT:
-            self.rect.bottom=C.GROUND_HEIGHT
-            self.y_vel=0
-            self.state='walk'
 
         if keys[pygame.K_RIGHT]:
             self.face_right = True
