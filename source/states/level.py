@@ -226,7 +226,9 @@ class Level:
                     sprite.go_bumped()
 
             if sprite.name=='brick':
-                if sprite.state=='rest':
+                if self.player.big and sprite.brick_type==0:#when mario is big and the brick contains nothing
+                    sprite.smashed(self.dying_group)
+                else:
                     sprite.go_bumped()
         pass
 
