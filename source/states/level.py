@@ -146,6 +146,11 @@ class Level:
                     shell.rect.x -= 40
                     shell.direction = 0
                 shell.state='slide'
+        powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
+        if powerup:
+            powerup.kill()
+            if powerup.name=='mushroom':
+                self.player.state='small2big'
         pass
 
     def check_y_collisions(self):
@@ -271,7 +276,7 @@ class Level:
             self.dying_group.update(self)
             self.shell_group.update(self)
             self.coin_group.update()
-            self.powerup_group.update()
+            self.powerup_group.update(self)
 
         self.draw(surface)
 
@@ -280,6 +285,8 @@ class Level:
         self.game_ground.blit(self.background,self.game_window,self.game_window)
         #画主角
         self.game_ground.blit(self.player.image,self.player.rect)
+        # 画升级道具(画在砖块前面是为了营造长出来的效果，即先画道具，后画宝箱，宝箱会挡住道具)
+        self.powerup_group.draw(self.game_ground)
         # 画砖块
         self.brick_group.draw(self.game_ground)
         # 画宝箱
@@ -292,8 +299,7 @@ class Level:
         self.shell_group.draw(self.game_ground)
         # 画金币
         self.coin_group.draw(self.game_ground)
-        # 画升级道具
-        self.powerup_group.draw(self.game_ground)
+
 
         #将gameground的游戏窗口部分渲染到屏幕上
         surface.blit(self.game_ground,(0,0),self.game_window)
