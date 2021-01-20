@@ -3,11 +3,12 @@ from .. import setup,tools
 from .. import constants as C
 
 class Brick(pygame.sprite.Sprite):
-    def __init__(self,x,y,brick_type,color=None):
+    def __init__(self,x,y,brick_type,color=None,name='brick'):
         pygame.sprite.Sprite.__init__(self)
         self.x=x
         self.y=y
         self.brick_type=brick_type
+        self.name=name
         bright_frame_rects=[(16,0,16,16),(48,0,16,16)]
         dark_frame_rects = [(16, 32, 16, 16), (48, 32, 16, 16)]
 
@@ -25,4 +26,37 @@ class Brick(pygame.sprite.Sprite):
         self.rect=self.image.get_rect()
         self.rect.x=self.x
         self.rect.y=self.y
+
+        self.state='rest'
+        self.gravity=C.GRAVITY
+
+    def update(self):
+        self.current_time=pygame.time.get_ticks()
+        self.handle_states()
+
+    def handle_states(self):
+        if self.state=='rest':
+            self.rest()
+        elif self.state=='bumped':
+            self.bumped()
+        elif self.state=='open':
+            self.open()
+
+    def rest(self):
+        pass
+
+    def go_bumped(self):
+        self.y_vel=-7
+        self.state='bumped'
+
+    def bumped(self):
+        self.rect.y+=self.y_vel
+        self.y_vel+=self.gravity
+
+        if self.rect.y>self.y+5:
+            self.rect.y=self.y
+            self.state='rest'
+
+    def open(self):
+        pass
     pass
