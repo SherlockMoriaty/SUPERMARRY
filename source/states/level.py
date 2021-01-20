@@ -197,7 +197,7 @@ class Level:
                 self.player.state='jump'
                 self.player.rect.bottom=enemy.rect.top
                 self.player.y_vel=self.player.jump_vel*0.8
-            enemy.go_die(how)
+            enemy.go_die(how,1 if self.player.face_right else -1)
 
         self.check_will_fall(self.player)
         pass
@@ -221,6 +221,8 @@ class Level:
             self.player.rect.top=sprite.rect.bottom
             self.player.state='fall'
 
+            self.is_enemy_on(sprite)
+
             if sprite.name=='box':
                 if sprite.state=='rest':
                     sprite.go_bumped()
@@ -232,6 +234,17 @@ class Level:
                     sprite.go_bumped()
         pass
 
+    def is_enemy_on(self,sprite):
+        sprite.rect.y -=1
+        enemy=pygame.sprite.spritecollideany(sprite,self.enemy_group)
+        if enemy:
+            self.enemy_group.remove(enemy)
+            self.dying_group.add(enemy)
+            if sprite.rect.centerx>enemy.rect.centerx:
+                enemy.go_die('bumped',-1)
+            else:
+                enemy.go_die('bumped',1)
+        sprite.rect.y+=1
     def check_will_fall(self,sprite):
         sprite.rect.y+=1
         check_group=pygame.sprite.Group(self.ground_items_group,self.brick_group, self.box_group)
