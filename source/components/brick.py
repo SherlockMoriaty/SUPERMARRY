@@ -47,6 +47,11 @@ class Brick(pygame.sprite.Sprite):
     def rest(self):
         pass
 
+    def open(self):
+        self.frame_index=1
+        self.image=self.frames[self.frame_index]
+    pass
+
     def go_bumped(self):
         self.y_vel=-7
         self.state='bumped'

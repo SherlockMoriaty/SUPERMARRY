@@ -10,7 +10,8 @@ def create_powerup(centerx,centery,type):
     :param type:
     :return:
     '''
-    return Mushroom(centerx,centery)
+    return Fireflower(centerx,centery)
+
 class Powerup(pygame.sprite.Sprite):
     def __init__(self,centerx,centery,frame_rects):
         pygame.sprite.Sprite.__init__(self)
@@ -80,6 +81,32 @@ class Mushroom(Powerup):
 
         if self.state!='grow':
             self.update_position(level)
+
+class Fireflower(Powerup):
+    def __init__(self, centerx,centery):
+        frame_rects=[(0,32,16,16),(16,32,16,16),(32,32,16,16),(48,32,16,16)]
+        Powerup.__init__(self, centerx,centery,frame_rects)
+        self.x_vel=2
+        self.state='grow'
+        self.name='fireflower'
+        self.timer=0
+
+    def update(self, level):
+        if self.state == 'grow':
+            self.rect.y+=self.y_vel
+            if self.rect.bottom<self.origin_y:
+                self.state='rest'
+
+        self.current_time=pygame.time.get_ticks()
+
+        if self.timer==0:
+            self.timer=self.current_time
+
+        if self.current_time-self.timer>30:
+            self.frame_index+=1
+            self.frame_index%=len(self.frames)
+            self.timer=self.current_time
+            self.image=self.frames[self.frame_index]
 
 class Fireball(Powerup):
     pass
