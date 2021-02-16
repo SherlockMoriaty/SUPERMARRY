@@ -155,9 +155,11 @@ class Level:
                 shell.state='slide'
         powerup=pygame.sprite.spritecollideany(self.player,self.powerup_group)
         if powerup:
-            powerup.kill()
-            if powerup.name=='fireflower':
-                self.player.state='big2fire'
+            if powerup.name=='fireball':
+                pass
+            elif powerup.name=='fireflower':
+                self.player.state = 'big2fire'
+                powerup.kill()
         pass
 
     def check_y_collisions(self):
@@ -286,7 +288,7 @@ class Level:
 
     def update(self,surface,keys):
         self.current_time=pygame.time.get_ticks()
-        self.player.update(keys)
+        self.player.update(keys,self)
 
         if self.player.dead:
             if self.current_time-self.player.death_timer>3000:

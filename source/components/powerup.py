@@ -109,7 +109,55 @@ class Fireflower(Powerup):
             self.image=self.frames[self.frame_index]
 
 class Fireball(Powerup):
-    pass
+    def __init__(self,centerx,centery,direction):
+        frame_rects=[(96,144,8,8),(104,144,8,8),(96,152,8,8),(104,152,8,8), #旋转
+                     (112,144,16,16),(112,160,16,16),(112,176,16,16)] #爆炸
+        Powerup.__init__(self,centerx,centery,frame_rects)
+        self.name='fireball'
+        self.state='fly'
+        self.direction=direction
+        self.x_vel=10 if self.direction else -10
+        self.y_vel=10
+        self.gravity=1
+        self.timer=0
+
+    def update_position(self,level):
+        self.rect.x+=self.x_vel
+        self.check_x_colletions(level)
+        self.rect.y += self.y_vel
+        self.check_y_colletions(level)
+
+        if self.rect.x<0 or self.rect.y>C.SCREEN_H:
+            self.kill()
+
+    def check_x_colletions(self, level):
+        sprite = pygame.sprite.spritecollideany(self, level.ground_items_group)
+        if sprite:
+            if self.direction:
+                self.direction = 0
+                self.rect.right = self.rect.left
+            else:
+                self.direction = 1
+                self.rect.left = self.rect.right
+            self.x_vel *= -1
+
+    def check_y_colletions(self, level):
+        check_group = pygame.sprite.Group(level.ground_items_group, level.box_group, level.brick_group)
+        sprite = pygame.sprite.spritecollideany(self, check_group)
+        if sprite:
+            if self.rect.top < sprite.rect.top:
+                self.rect.bottom = sprite.rect.top
+                self.y_vel = -10
+
+    def update(self, level):
+        self.current_time=pygame.time.get_ticks()
+        if self.state=='fly':
+            self.y_vel+=self.gravity
+            if self.current_time-self.timer>200:
+                self.frame_index+=1
+                self.frame_index%=4
+                self.timer=self.current_time
+            self.update_position(level)
 
 class LifeHushroom (Powerup):
     pass

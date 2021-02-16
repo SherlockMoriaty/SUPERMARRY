@@ -1,6 +1,7 @@
 import pygame
 from .. import setup, tools
 from .. import constants as C
+from . import powerup
 import os, json
 
 
@@ -110,17 +111,17 @@ class Player(pygame.sprite.Sprite):
         # 载入主角帧造型
         pass
 
-    def update(self, keys):
+    def update(self, keys,level):
         self.current_time = pygame.time.get_ticks()
-        self.handle_states(keys)
+        self.handle_states(keys,level)
         self.is_hurt_immune()
 
-    def handle_states(self, keys):
+    def handle_states(self, keys,level):
 
         self.can_jump_or_not(keys)
 
         if self.state == 'stand':
-            self.stand(keys)
+            self.stand(keys,level)
         elif self.state == 'walk':
             self.walk(keys)
         elif self.state == 'jump':
@@ -144,7 +145,7 @@ class Player(pygame.sprite.Sprite):
         if not keys[pygame.K_SPACE]:
             self.can_jump=True
 
-    def stand(self, keys):
+    def stand(self, keys, level):
         self.frame_index = 0
         self.x_vel = 0
         self.y_vel = 0
@@ -157,6 +158,8 @@ class Player(pygame.sprite.Sprite):
         elif keys[pygame.K_SPACE] and self.can_jump:
             self.state='jump'
             self.y_vel=self.jump_vel
+        elif keys[pygame.K_s]:
+            self.shoot_fireball(level)
         pass
 
     def walk(self, keys):
@@ -342,6 +345,10 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom=last_frame_bottom
         self.rect.centerx=last_frame_centerx
 
+    def shoot_fireball(self,level):
+        self.frame_index=6
+        fireball=powerup.Fireball(self.rect.centerx,self.rect.centery,self.face_right)
+        level.powerup_group.add(fireball)
 
 
 
